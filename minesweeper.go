@@ -2,15 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
 )
-
-//board is a 2d slice to keep all the cells
-type board [][]cell
-
-//directions: up, down, left, right,
-//up-left, up-right, down-left, down-right
-var directions = [8][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1},
-	{-1, 1}, {1, -1}, {1, 1}}
 
 func main() {
 	fmt.Println("Welcome to Minesweeper!")
@@ -40,13 +35,13 @@ func main() {
 		var height int
 		getSetupInput(&height, "Height (between 10 and 20): ")
 
-		b, numMines := newBoard(width, height)
+		b, numMines := NewBoard(width, height)
 
-		b.printBoard()
+		b.PrintBoard()
 		numCells := height*width - numMines
 		fmt.Println("Number of Mines:", numMines)
 		fmt.Println("Number of Unshown Cells:", numCells)
-		win := b.runGame(height, width, height*width-numMines, numMines)
+		win := runGame(b, height, width, height*width-numMines, numMines)
 
 		if win {
 			fmt.Println("You Win!!!")
@@ -100,8 +95,17 @@ func getSetupInput(num *int, inputString string) {
 
 }
 
+//clears the terminal if it is a linux system
+func clear() {
+	if runtime.GOOS == "linux" {
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
+}
+
 //runGame starts the minesweeper game
-func (b board) runGame(height, width, numCells, numMines int) bool {
+func runGame(b Board, height, width, numCells, numMines int) bool {
 	end := false
 	for !end {
 		fmt.Println("What do you want to do?")
@@ -132,7 +136,7 @@ func (b board) runGame(height, width, numCells, numMines int) bool {
 				continue
 			}
 		default:
-			b.printBoard()
+			b.PrintBoard()
 			fmt.Println("Not 'c', 'e' or 'm'")
 			continue
 		}
@@ -140,19 +144,19 @@ func (b board) runGame(height, width, numCells, numMines int) bool {
 		var cells int
 		switch choice {
 		case "c":
-			end, cells = b.choose(row, col)
+			end, cells = b.Choose(row, col)
 			numCells -= cells
 		case "e":
-			end, cells = b.expand(row, col)
+			end, cells = b.Expand(row, col)
 			numCells -= cells
 		case "m":
-			marked := b.mark(row, col)
+			marked := b.Mark(row, col)
 			numMines += marked
 		default:
 			continue
 		}
 
-		b.printBoard()
+		b.PrintBoard()
 		fmt.Println("Number of Mines:", numMines)
 		fmt.Println("Number of Unshown Cells:", numCells)
 		if end {
@@ -165,67 +169,4 @@ func (b board) runGame(height, width, numCells, numMines int) bool {
 
 	}
 	return true
-}
-
-//chooses an unrevealed cell to reveal
-//assumes row and col are inbound
-//shows the cell you chose
-//returns whether you hit a mine or not and the number of cells actually chosen
-func (b board) choose(row, col int) (bool, int) {
-	//don't choose marked cells
-	if b[row][col].mark || b[row][col].show {
-		return false, 0
-	}
-
-	b[row][col].show = true
-	numCells := 1
-	if b[row][col].value == 'm' {
-		return true, 1
-	} else if b[row][col].value == '\x00' {
-		_, cells := b.expand(row, col)
-		numCells += cells
-	}
-
-	return false, numCells
-
-}
-
-//if given a shown cell it chooses all cells around it.
-//returns whether you hit a mine or not and the number of cells actually chosen
-func (b board) expand(row, col int) (bool, int) {
-	if !b[row][col].show {
-		return false, 0
-	}
-
-	height := len(b)
-	width := len(b[0])
-	numCells := 0
-
-	for _, direction := range directions {
-		rowCheck := row + direction[0]
-		colCheck := col + direction[1]
-		if inbound(rowCheck, colCheck, height, width) {
-			end, i := b.choose(rowCheck, colCheck)
-			if end {
-				return true, numCells
-			}
-			numCells += i
-		}
-	}
-
-	return false, numCells
-
-}
-
-//marks a cell as having a mine
-func (b board) mark(row, col int) int {
-	if b[row][col].mark {
-		b[row][col].mark = false
-		return 1
-	} else if b[row][col].show {
-		return 0
-	} else {
-		b[row][col].mark = true
-		return -1
-	}
 }
