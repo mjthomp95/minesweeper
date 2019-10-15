@@ -35,13 +35,17 @@ func main() {
 		var height int
 		getSetupInput(&height, "Height (between 10 and 20): ")
 
-		b, numMines := NewBoard(width, height)
+		b, numMines, err := NewBoard(width, height)
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
 
 		b.PrintBoard()
 		numCells := height*width - numMines
 		fmt.Println("Number of Mines:", numMines)
 		fmt.Println("Number of Unshown Cells:", numCells)
-		win := runGame(b, height, width, height*width-numMines, numMines)
+		win := runGame(*b, height, width, height*width-numMines, numMines)
 
 		if win {
 			fmt.Println("You Win!!!")
@@ -122,7 +126,7 @@ func runGame(b Board, height, width, numCells, numMines int) bool {
 				fmt.Println(err.Error())
 				continue
 			}
-			if !inbound(row, 0, height, width) {
+			if !b.Inbound(row, 0) {
 				fmt.Println("Row out of Bounds")
 				continue
 			}
@@ -131,7 +135,7 @@ func runGame(b Board, height, width, numCells, numMines int) bool {
 				fmt.Println(err.Error())
 				continue
 			}
-			if !inbound(row, col, height, width) {
+			if !b.Inbound(row, col) {
 				fmt.Println("Column out of Bounds")
 				continue
 			}
@@ -142,15 +146,28 @@ func runGame(b Board, height, width, numCells, numMines int) bool {
 		}
 
 		var cells int
+		var err error
 		switch choice {
 		case "c":
-			end, cells = b.Choose(row, col)
+			end, cells, err = b.Choose(row, col)
+			if err != nil {
+				fmt.Print(err.Error())
+				continue
+			}
 			numCells -= cells
 		case "e":
-			end, cells = b.Expand(row, col)
+			end, cells, err = b.Expand(row, col)
+			if err != nil {
+				fmt.Print(err.Error())
+				continue
+			}
 			numCells -= cells
 		case "m":
-			marked := b.Mark(row, col)
+			marked, err := b.Mark(row, col)
+			if err != nil {
+				fmt.Print(err.Error())
+				continue
+			}
 			numMines += marked
 		default:
 			continue
