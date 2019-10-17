@@ -27,7 +27,7 @@ type OutOfBoundsError struct {
 }
 
 func (e *OutOfBoundsError) Error() string {
-	return fmt.Sprintf("out of bounds; Row: $d and Column: %d not within"+
+	return fmt.Sprintf("out of bounds; Row: %d and Column: %d not within"+
 		"Board with Height: %d, Width: %d", e.row, e.col, e.height, e.width)
 }
 
