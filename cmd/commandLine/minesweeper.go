@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+
+	"github.com/mjthomp95/minesweeper/pkg/board"
 )
 
 func main() {
@@ -35,13 +37,14 @@ func main() {
 		var height int
 		getSetupInput(&height, "Height (between 10 and 20): ")
 
-		b, numMines, err := NewBoard(width, height)
+		b, numMines, err := board.NewBoard(width, height)
 		if err != nil {
 			fmt.Println(err.Error())
 			continue
 		}
 
-		b.PrintBoard()
+		clear()
+		fmt.Println(b.PrintBoard())
 		numCells := height*width - numMines
 		fmt.Println("Number of Mines:", numMines)
 		fmt.Println("Number of Unshown Cells:", numCells)
@@ -109,7 +112,7 @@ func clear() {
 }
 
 //runGame starts the minesweeper game
-func runGame(b Board, height, width, numCells, numMines int) bool {
+func runGame(b board.Board, height, width, numCells, numMines int) bool {
 	end := false
 	for !end {
 		fmt.Println("What do you want to do?")
@@ -140,7 +143,8 @@ func runGame(b Board, height, width, numCells, numMines int) bool {
 				continue
 			}
 		default:
-			b.PrintBoard()
+			clear()
+			fmt.Println(b.PrintBoard())
 			fmt.Println("Not 'c', 'e' or 'm'")
 			continue
 		}
@@ -173,7 +177,8 @@ func runGame(b Board, height, width, numCells, numMines int) bool {
 			continue
 		}
 
-		b.PrintBoard()
+		clear()
+		fmt.Println(b.PrintBoard())
 		fmt.Println("Number of Mines:", numMines)
 		fmt.Println("Number of Unshown Cells:", numCells)
 		if end {

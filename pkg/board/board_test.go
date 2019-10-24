@@ -1,4 +1,4 @@
-package main
+package board
 
 import (
 	"reflect"
@@ -121,3 +121,5 @@ func TestNewBoard(t *testing.T) {
 		}
 	}
 }
+
+// TODO: More Tests

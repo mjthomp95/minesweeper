@@ -1,10 +1,10 @@
-package main
+package board
 
 import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"os"
+	"strings"
 	"text/tabwriter"
 	"time"
 )
@@ -186,36 +186,36 @@ func center(s rune, w int) string {
 	return fmt.Sprintf("%[1]*s", -w, fmt.Sprintf("%[1]*v", (w+1)/2, s))
 }
 
-//PrintBoard prints out the board to the terminal
-//// TODO: Change this to returning a string
-func (b Board) PrintBoard() {
-	clear()
-	w := tabwriter.NewWriter(os.Stdout, 5, 1, 0, ' ', 0)
+//PrintBoard creates a string representation of the board to be printed out
+func (b Board) PrintBoard() string {
+	if b.height == 0 || b.width == 0 {
+		return ""
+	}
+	var strBuilder strings.Builder
+	w := tabwriter.NewWriter(&strBuilder, 7, 1, 0, ' ', 0)
 	fmt.Fprint(w, "\t") //spacing
-	if b.height <= 0 {
-		return // TODO: quick fix make more permanent fix
-	}
 	for i := range b.cells[0] {
-		fmt.Fprint(w, center(rune(i), 5), "\t")
+		fmt.Fprint(w, "  ", center(rune(i), 5), "\t")
 	}
-	fmt.Fprint(w, "col\n")
+	fmt.Fprint(w, "col\n\n")
 	for i := range b.cells {
-		fmt.Fprint(w, center(rune(i), 5), "\t")
+		fmt.Fprint(w, "  ", center(rune(i), 5), "\t")
 		for j := range b.cells[0] {
 			if b.cells[i][j].show {
-				fmt.Fprint(w, "[", center(b.cells[i][j].value, 3), "]\t")
+				fmt.Fprint(w, "  [", center(b.cells[i][j].value, 3), "]\t")
 			} else {
 				if b.cells[i][j].mark {
-					fmt.Fprint(w, "[ x ]\t")
+					fmt.Fprint(w, "  [ x ]\t")
 				} else {
-					fmt.Fprint(w, "[   ]\t")
+					fmt.Fprint(w, "  [   ]\t")
 				}
 			}
 		}
-		fmt.Fprintf(w, "\n")
+		fmt.Fprintf(w, "\n\n")
 	}
 	fmt.Fprintf(w, " row \n")
 	w.Flush()
+	return strBuilder.String()
 }
 
 //Inbound checks if a row or col is within the board
