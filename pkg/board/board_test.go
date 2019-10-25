@@ -12,9 +12,11 @@ func TestBlankBoard(t *testing.T) {
 		width  int
 		result Board
 	}{
-		{1, 1, Board{[][]cell{{blankCell}}, 1, 1}},
-		{2, 2, Board{[][]cell{{blankCell, blankCell}, {blankCell, blankCell}}, 2, 2}},
-		{1, 3, Board{[][]cell{{blankCell, blankCell, blankCell}}, 1, 3}},
+		{1, 1, Board{[][]cell{{blankCell}}, [][]OutputCell{{0}}, 1, 1}},
+		{2, 2, Board{[][]cell{{blankCell, blankCell}, {blankCell, blankCell}},
+			[][]OutputCell{{0, 0}, {0, 0}}, 2, 2}},
+		{1, 3, Board{[][]cell{{blankCell, blankCell, blankCell}},
+			[][]OutputCell{{0, 0, 0}}, 1, 3}},
 	}
 
 	cellCheck := blankBoard(1, 1).cells

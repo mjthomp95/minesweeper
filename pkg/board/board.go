@@ -15,9 +15,13 @@ type cell struct {
 	mark  bool
 }
 
+//OutputCell is the type of each element of the output board given.
+type OutputCell = rune
+
 //Board is a 2d slice to keep all the cells
 type Board struct {
 	cells         [][]cell
+	outputCells   [][]OutputCell
 	height, width int
 }
 
@@ -82,10 +86,12 @@ func (b Board) placeBombs() int {
 //creates a Board with given row and height, but a blank cells array.
 func blankBoard(width, height int) Board {
 	vals := make([][]cell, height)
+	outputVals := make([][]OutputCell, height)
 	for i := range vals {
 		vals[i] = make([]cell, width)
+		outputVals[i] = make([]OutputCell, width)
 	}
-	return Board{vals, height, width}
+	return Board{vals, outputVals, height, width}
 }
 
 //NewBoard returns a Board of specified size, the number of mines or an error if
@@ -108,16 +114,17 @@ func NewBoard(width, height int) (*Board, int, error) {
 // TODO: Possibly add wrapper functions for all actions such that the wrapped function doesn't check for errors but wrapper function does.
 //prevents double checking for errors since some actions are called within other actions.
 func (b Board) Choose(row, col int) (bool, int, error) {
-	//don't choose marked cells
 	if !b.Inbound(row, col) {
 		return false, 0, &OutOfBoundsError{row, col, b.height, b.width}
 	}
 
+	//don't choose marked cells
 	if b.cells[row][col].mark || b.cells[row][col].show {
 		return false, 0, nil
 	}
 
 	b.cells[row][col].show = true
+	b.outputCells[row][col] = b.cells[row][col].value + 48 //want unicode for the integer
 	numCells := 1
 	if b.cells[row][col].value == 'm' {
 		return true, 1, nil
@@ -168,11 +175,13 @@ func (b Board) Mark(row, col int) (int, error) {
 
 	if b.cells[row][col].mark {
 		b.cells[row][col].mark = false
+		b.outputCells[row][col] = ' '
 		return 1, nil
 	} else if b.cells[row][col].show {
 		return 0, nil
 	} else {
 		b.cells[row][col].mark = true
+		b.outputCells[row][col] = 'm'
 		return -1, nil
 	}
 }
@@ -187,6 +196,7 @@ func center(s rune, w int) string {
 }
 
 //PrintBoard creates a string representation of the board to be printed out
+// TODO: Change to use outputCells
 func (b Board) PrintBoard() string {
 	if b.height == 0 || b.width == 0 {
 		return ""
@@ -229,4 +239,10 @@ func (b Board) Inbound(row, col int) bool {
 	}
 
 	return true
+}
+
+//OutputBoard returns a representation of the whole board only showing cells that
+//are marked or shown. Any other cell is blank.
+func (b Board) OutputBoard() [][]OutputCell {
+	return b.outputCells
 }
