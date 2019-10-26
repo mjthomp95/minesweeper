@@ -16,6 +16,7 @@ type newBoard struct {
 	Mines int      `json:"mines"`
 }
 
+// TODO: change all responses from 'mark', 'choose', 'expand', 'new', and 'output' to json.
 // IDEA: use a map of ids to different boards to have multiple instances of a game.
 func main() {
 	//one instance of game
