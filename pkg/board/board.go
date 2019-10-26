@@ -18,11 +18,20 @@ type cell struct {
 //OutputCell is the type of each element of the output board given.
 type OutputCell = rune
 
+type Output struct {
+	row, col int
+	value    rune
+}
+
 //Board is a 2d slice to keep all the cells
 type Board struct {
 	cells         [][]cell
 	outputCells   [][]OutputCell
 	height, width int
+	mines         int
+	unshownCells  int
+	gameOver      bool
+	win           bool
 }
 
 //OutOfBoundsError tells if a certain row and column are not within a board.
@@ -30,9 +39,21 @@ type OutOfBoundsError struct {
 	row, col, height, width int
 }
 
-func (e *OutOfBoundsError) Error() string {
+func (e OutOfBoundsError) Error() string {
 	return fmt.Sprintf("out of bounds; Row: %d and Column: %d not within"+
 		"Board with Height: %d, Width: %d", e.row, e.col, e.height, e.width)
+}
+
+//GameOver tells you if you try to make a move and the game is over
+type GameOver struct {
+	Win bool
+}
+
+func (e GameOver) Error() string {
+	if e.Win {
+		return "You Won!"
+	}
+	return "You Lost"
 }
 
 //directions: up, down, left, right,
@@ -42,7 +63,6 @@ var directions = [8][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1},
 
 //Increases the count of the cells around a mine
 func (b Board) increaseCount(row, col int) {
-
 	for _, direction := range directions {
 		rowCheck := row + direction[0]
 		colCheck := col + direction[1]
@@ -56,7 +76,7 @@ func (b Board) increaseCount(row, col int) {
 }
 
 //Randomly places mines across the input board.
-func (b Board) placeBombs() int {
+func (b *Board) placeBombs() int {
 	//maxMines is 10% of the number of cells
 	maxMines := int(float32(b.height) * float32(b.width) * .1)
 	numMines := 0
@@ -66,6 +86,7 @@ func (b Board) placeBombs() int {
 		for i := range b.cells {
 			for j, c := range b.cells[i] {
 				if numMines >= maxMines {
+					b.mines = numMines
 					return numMines
 				}
 				if c.value == 'm' {
@@ -79,109 +100,168 @@ func (b Board) placeBombs() int {
 			}
 		}
 	}
+	b.mines = numMines
 	return numMines
 }
 
 //blankBoard helper function for NewBoard. Doesn't check validity of row and height
 //creates a Board with given row and height, but a blank cells array.
-func blankBoard(width, height int) Board {
+func blankBoard(width, height int) *Board {
 	vals := make([][]cell, height)
 	outputVals := make([][]OutputCell, height)
 	for i := range vals {
 		vals[i] = make([]cell, width)
 		outputVals[i] = make([]OutputCell, width)
 	}
-	return Board{vals, outputVals, height, width}
+	return &Board{vals, outputVals, height, width, 0, width * height, false, false} //int overflow?
 }
 
 //NewBoard returns a Board of specified size, the number of mines or an error if
 // the height or width isn't a positive non-zero value
-func NewBoard(width, height int) (*Board, int, error) {
-
+func NewBoard(width, height int) (*Board, error) {
 	if width <= 0 || height <= 0 {
-		return nil, 0, errors.New("need positive, non-zero values for width and height")
+		return nil, errors.New("need positive, non-zero values for width and height")
 	}
 	b := blankBoard(width, height)
+	b.placeBombs()
+	return b, nil
+}
 
-	numMines := b.placeBombs()
-	return &b, numMines, nil
+//GetMines returns the number of mines subracted from the number of marked cells.
+func (b Board) GetMines() int {
+	return b.mines
+}
+
+//GetNumCells returns the number of cells that aren't shown and unmarked.
+func (b Board) GetNumCells() int {
+	return b.unshownCells
+}
+
+//Win returns whether you have won or not.
+func (b Board) Win() bool {
+	return b.win
+}
+
+//IsGameOver returns whether the game is done or not.
+func (b Board) IsGameOver() bool {
+	return b.gameOver
+}
+
+//checkGameOver checks to see if the game is over.
+//should only check for unshownCells
+func (b Board) checkWin() bool {
+	if b.unshownCells == 0 && b.mines == 0 {
+		return true
+	}
+
+	return false
 }
 
 //Choose reveals an unrevealed cell
 //assumes row and col are inbound
 //shows the cell you chose
 //returns whether you hit a mine or not and the number of cells actually chosen
-// TODO: Possibly add wrapper functions for all actions such that the wrapped function doesn't check for errors but wrapper function does.
+// IDEA: Possibly add wrapper functions for all actions such that the wrapped function doesn't check for errors but wrapper function does.
 //prevents double checking for errors since some actions are called within other actions.
-func (b Board) Choose(row, col int) (bool, int, error) {
+func (b *Board) Choose(row, col int) (output []Output, err error) {
+	if b.gameOver {
+		err = GameOver{b.win}
+		return
+	}
 	if !b.Inbound(row, col) {
-		return false, 0, &OutOfBoundsError{row, col, b.height, b.width}
+		err = OutOfBoundsError{row, col, b.height, b.width}
+		return
 	}
 
 	//don't choose marked cells
 	if b.cells[row][col].mark || b.cells[row][col].show {
-		return false, 0, nil
+		return
 	}
 
 	b.cells[row][col].show = true
 	b.outputCells[row][col] = b.cells[row][col].value + 48 //want unicode for the integer
-	numCells := 1
+	output = append(output, Output{row, col, b.outputCells[row][col]})
 	if b.cells[row][col].value == 'm' {
-		return true, 1, nil
+		b.gameOver = true
+		err = GameOver{false}
+		return
 	} else if b.cells[row][col].value == '\x00' {
-		_, cells, _ := b.Expand(row, col) //inbounds already checked
-		numCells += cells
+		expOut, expErr := b.Expand(row, col) //inbounds already checked
+		output = append(output, expOut...)
+		switch expErr.(type) {
+		case GameOver:
+			err = expErr
+		}
 	}
 
-	return false, numCells, nil
-
+	b.unshownCells--
+	if b.checkWin() {
+		b.win = true
+		b.gameOver = true
+		err = GameOver{true}
+	}
+	return
 }
 
 //Expand if given a shown cell it chooses all cells around it.
-//returns whether you hit a mine or not and the number of cells actually chosen
-func (b Board) Expand(row, col int) (bool, int, error) {
+//returns the list of cells you hit and what their value was.
+func (b *Board) Expand(row, col int) (output []Output, err error) {
+	if b.gameOver {
+		err = GameOver{b.win}
+		return
+	}
 	if !b.Inbound(row, col) {
-		return false, 0, &OutOfBoundsError{row, col, b.height, b.width}
+		err = OutOfBoundsError{row, col, b.height, b.width}
+		return
 	}
 
 	if !b.cells[row][col].show {
-		return false, 0, nil
+		return
 	}
-
-	numCells := 0
 
 	for _, direction := range directions {
 		rowCheck := row + direction[0]
 		colCheck := col + direction[1]
-		end, i, err := b.Choose(rowCheck, colCheck) //inbounds gets checked
-		if err != nil {
-			continue
+		chOut, chErr := b.Choose(rowCheck, colCheck) //inbounds gets checked
+		output = append(output, chOut...)
+		switch chErr.(type) {
+		case GameOver:
+			err = chErr
+			return
 		}
-		if end {
-			return true, numCells, nil
-		}
-		numCells += i
 	}
 
-	return false, numCells, nil
+	return
 
 }
 
 //Mark denotes a cell as having a mine
-func (b Board) Mark(row, col int) (int, error) {
+func (b *Board) Mark(row, col int) (int, error) {
+	if b.gameOver {
+		return 0, GameOver{b.win}
+	}
 	if !b.Inbound(row, col) {
-		return 0, &OutOfBoundsError{row, col, b.height, b.width}
+		return 0, OutOfBoundsError{row, col, b.height, b.width}
 	}
 
 	if b.cells[row][col].mark {
 		b.cells[row][col].mark = false
+		b.mines++
+		b.unshownCells++
 		b.outputCells[row][col] = ' '
 		return 1, nil
 	} else if b.cells[row][col].show {
 		return 0, nil
 	} else {
 		b.cells[row][col].mark = true
+		b.mines--
+		b.unshownCells--
 		b.outputCells[row][col] = 'm'
+		if b.checkWin() {
+			b.win = true
+			b.gameOver = true
+			return -1, GameOver{true}
+		}
 		return -1, nil
 	}
 }
@@ -227,6 +307,8 @@ func (b Board) PrintBoard() string {
 	w.Flush()
 	return strBuilder.String()
 }
+
+// IDEA: Add reset function to reuse the same board
 
 //Inbound checks if a row or col is within the board
 func (b Board) Inbound(row, col int) bool {
