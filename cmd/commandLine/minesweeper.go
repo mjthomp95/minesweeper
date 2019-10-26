@@ -37,7 +37,7 @@ func main() {
 		var height int
 		getSetupInput(&height, "Height (between 10 and 20): ")
 
-		b, numMines, err := board.NewBoard(width, height)
+		b, err := board.NewBoard(width, height)
 		if err != nil {
 			fmt.Println(err.Error())
 			continue
@@ -45,11 +45,11 @@ func main() {
 
 		clear()
 		fmt.Println(b.PrintBoard())
-		numCells := height*width - numMines
-		fmt.Println("Number of Mines:", numMines)
-		fmt.Println("Number of Unshown Cells:", numCells)
-		win := runGame(*b, height, width, height*width-numMines, numMines)
-
+		fmt.Println("Number of Mines:", b.GetMines())
+		fmt.Println("Number of Unshown Cells:", b.GetNumCells())
+		win := runGame(*b, height, width)
+		clear()
+		fmt.Println(b.PrintBoard())
 		if win {
 			fmt.Println("You Win!!!")
 		} else {
@@ -112,7 +112,7 @@ func clear() {
 }
 
 //runGame starts the minesweeper game
-func runGame(b board.Board, height, width, numCells, numMines int) bool {
+func runGame(b board.Board, height, width int) bool {
 	end := false
 	for !end {
 		fmt.Println("What do you want to do?")
@@ -149,46 +149,45 @@ func runGame(b board.Board, height, width, numCells, numMines int) bool {
 			continue
 		}
 
-		var cells int
-		var err error
 		switch choice {
 		case "c":
-			end, cells, err = b.Choose(row, col)
-			if err != nil {
-				fmt.Print(err.Error())
+			_, err := b.Choose(row, col)
+			switch err.(type) {
+			case nil:
+			case board.GameOver:
+				return err.(board.GameOver).Win
+			default:
+				fmt.Println(err.Error())
 				continue
 			}
-			numCells -= cells
 		case "e":
-			end, cells, err = b.Expand(row, col)
-			if err != nil {
-				fmt.Print(err.Error())
+			_, err := b.Expand(row, col) //don't need the returned list
+			switch err.(type) {
+			case nil:
+			case board.GameOver:
+				return err.(board.GameOver).Win
+			default:
+				fmt.Println(err.Error())
 				continue
 			}
-			numCells -= cells
 		case "m":
-			marked, err := b.Mark(row, col)
-			if err != nil {
-				fmt.Print(err.Error())
+			_, err := b.Mark(row, col)
+			switch err.(type) {
+			case nil:
+			case board.GameOver:
+				return err.(board.GameOver).Win
+			default:
+				fmt.Println(err.Error())
 				continue
 			}
-			numMines += marked
 		default:
 			continue
 		}
 
 		clear()
 		fmt.Println(b.PrintBoard())
-		fmt.Println("Number of Mines:", numMines)
-		fmt.Println("Number of Unshown Cells:", numCells)
-		if end {
-			return false
-		}
-
-		if numCells == 0 && numMines == 0 {
-			end = true
-		}
-
+		fmt.Println("Number of Mines:", b.GetMines())
+		fmt.Println("Number of Cells left:", b.GetNumCells())
 	}
 	return true
 }
