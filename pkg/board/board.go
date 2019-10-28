@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+//Move is a function that does an action on the board
+type Move func(int, int) ([]Output, error)
+
 type cell struct {
 	value rune
 	show  bool
@@ -18,6 +21,7 @@ type cell struct {
 //OutputCell is the type of each element of the output board given.
 type OutputCell = rune
 
+//Output is the type to tell that a cell has changed (shown or marked/unmarked)
 type Output struct {
 	row, col int
 	value    rune
@@ -236,33 +240,37 @@ func (b *Board) Expand(row, col int) (output []Output, err error) {
 }
 
 //Mark denotes a cell as having a mine
-func (b *Board) Mark(row, col int) (int, error) {
+func (b *Board) Mark(row, col int) ([]Output, error) {
 	if b.gameOver {
-		return 0, GameOver{b.win}
+		return nil, GameOver{b.win}
 	}
 	if !b.Inbound(row, col) {
-		return 0, OutOfBoundsError{row, col, b.height, b.width}
+		return nil, OutOfBoundsError{row, col, b.height, b.width}
 	}
 
+	output := make([]Output, 1, 1)
 	if b.cells[row][col].mark {
 		b.cells[row][col].mark = false
 		b.mines++
 		b.unshownCells++
-		b.outputCells[row][col] = ' '
-		return 1, nil
+		b.outputCells[row][col] = 0
+		output[0] = Output{row, col, 0}
+		return output, nil
 	} else if b.cells[row][col].show {
-		return 0, nil
+		output[0] = Output{row, col, b.outputCells[row][col]}
+		return output, nil
 	} else {
 		b.cells[row][col].mark = true
 		b.mines--
 		b.unshownCells--
 		b.outputCells[row][col] = 'm'
+		output[0] = Output{row, col, 'm'}
 		if b.checkWin() {
 			b.win = true
 			b.gameOver = true
-			return -1, GameOver{true}
+			return output, GameOver{true}
 		}
-		return -1, nil
+		return output, nil
 	}
 }
 
