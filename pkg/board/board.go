@@ -23,8 +23,8 @@ type OutputCell = rune
 
 //Output is the type to tell that a cell has changed (shown or marked/unmarked)
 type Output struct {
-	row, col int
-	value    rune
+	Row, Col int
+	Value    rune
 }
 
 //Board is a 2d slice to keep all the cells
