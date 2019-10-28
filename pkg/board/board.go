@@ -263,8 +263,8 @@ func (b *Board) Mark(row, col int) ([]Output, error) {
 		b.cells[row][col].mark = true
 		b.mines--
 		b.unshownCells--
-		b.outputCells[row][col] = 'm'
-		output[0] = Output{row, col, 'm'}
+		b.outputCells[row][col] = 'x'
+		output[0] = Output{row, col, 'x'}
 		if b.checkWin() {
 			b.win = true
 			b.gameOver = true
