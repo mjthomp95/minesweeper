@@ -183,7 +183,11 @@ func (b *Board) Choose(row, col int) (output []Output, err error) {
 	}
 
 	b.cells[row][col].show = true
-	b.outputCells[row][col] = b.cells[row][col].value + 48 //want unicode for the integer
+	if b.cells[row][col].value != 'm' {
+		b.outputCells[row][col] = b.cells[row][col].value + 48 //want unicode for the integer
+	} else {
+		b.outputCells[row][col] = b.cells[row][col].value
+	}
 	output = append(output, Output{row, col, b.outputCells[row][col]})
 	if b.cells[row][col].value == 'm' {
 		b.gameOver = true
