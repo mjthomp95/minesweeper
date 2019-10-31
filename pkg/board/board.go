@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// IDEA: Add timer
+
 //Move is a function that does an action on the board
 type Move func(int, int) ([]Output, error)
 
