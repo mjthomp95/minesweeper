@@ -1,0 +1,22 @@
+.App {
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.buffer {
+    width: 50%;
+}
+
+.board {
+    width: 50%;
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto auto auto auto;
+    grid-template-rows: auto auto auto auto auto auto auto auto auto auto;
+}
+
+.cell {
+    background-color: grey;
+}
