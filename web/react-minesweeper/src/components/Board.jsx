@@ -45,6 +45,8 @@ const Board = () => {
         setBoard(tmpBoard)
     };
 
+// TODO: add scoreboard and maybe timer; timer might come from server in later version.
+
     return (<div className='canvas'>
             {gameState.gameOver && <h2>{gameState.win}</h2>}
             <div className='board'>
