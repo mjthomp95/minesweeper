@@ -4,6 +4,7 @@
   justify-content: center;
 }
 
+/* FIXME: whole board doesn't fit on page with full view */
 .canvas {
     display: flex;
     flex-direction: column;
@@ -42,9 +43,10 @@
 }
 
 #svg8, #svg9{
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
     height: 100%;
     width: 100%;
-    padding-bottom: 0%;
 }
 
 .cell {
@@ -54,9 +56,4 @@
     text-align: center;
     height: 100%;
     width: 100%;
-}
-
-svg {
-    position: absolute;
-    top: 0; bottom: 0; left: 0; right: 0;
 }
