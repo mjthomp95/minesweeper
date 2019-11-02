@@ -1,7 +1,5 @@
 .App {
   text-align: center;
-  /* display: flex; */
-  /* flex-direction: column; */
   align-items: center;
   justify-content: center;
 }
@@ -10,10 +8,13 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    height: 100%;
 }
 
 .board {
+    position: relative;
     width: 50%;
+    height: 100%;
     margin-left: auto;
     margin-right: auto;
     display: grid;
@@ -25,31 +26,37 @@
     justify-content: center;
 }
 
-.show, .mark{
+.show {
+    position: absolute;
+    bottom: 0; right: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+
+.set_height {
+    padding-bottom:100%;
+    width:100%;
+    height:0%;
+}
+
+#svg8, #svg9{
     height: 100%;
-    position: relative;
-    top: 25%;
+    width: 100%;
+    padding-bottom: 0%;
 }
 
-#svg8 {
-    transform: translate(0px, 3px);
-    height: 25px;
-    width: 25px;
-}
-
-/* .mark {
-    display:table-cell;
-    text-align: center;
-    vertical-align: middle;
-    height: inherit;
-    width: inherit;
-} */
-
-/* TODO: figure out how to stop board from squashing after no cell elements are Blank */
 .cell {
+    position: relative;
     border: 1px solid DarkGrey;
-    background-color: grey;
+    background-color: lightgrey;
     text-align: center;
     height: 100%;
     width: 100%;
+}
+
+svg {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
 }

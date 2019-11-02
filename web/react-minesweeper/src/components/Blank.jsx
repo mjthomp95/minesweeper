@@ -1,13 +1,8 @@
 import React from 'react';
 
 const Blank = () => {
-    return (<svg
-       xmlnsDc="http://purl.org/dc/elements/1.1/"
-       xmlnsCc="http://creativecommons.org/ns#"
-       xmlnsRdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-       xmlnsSvg="http://www.w3.org/2000/svg"
+    return (<div className='blank'><div className='set_height'></div><svg
        xmlns="http://www.w3.org/2000/svg"
-       xmlnsXlink="http://www.w3.org/1999/xlink"
        id="svg8"
        version="1.1"
        viewBox="0 0 5.2649999 5.2649999"
@@ -59,7 +54,7 @@ const Blank = () => {
            id="rect849"
            style={{opacity:1, fill:'#999999',fillOpacity:0.9905213,stroke:'#000000',strokeWidth:0.46962023,strokeMiterlimit:4,strokeDasharray:'none',strokeOpacity:0}} />
       </g>
-    </svg>
+    </svg></div>
 );
 }
 

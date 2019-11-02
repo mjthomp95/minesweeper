@@ -31,7 +31,7 @@ const fetchChanges = (row, col, method, callBack) => {
         headers: {'Content-Type':'application/x-www-form-urlencoded'},
         body: `row=${row}&col=${col}`
     })
-    .then(resp => {return resp.json()}) // IDEA: Could I change so it only sends if there are multiple changes and not just this one.
+    .then(resp => {return resp.json()})
     .then(data => {callBack(data)});
 }
 
@@ -49,7 +49,7 @@ const doubleClick = (row, col, callBack) => {
 }
 
 const show = (val) => {
-    if (val === 0) {
+    if (val === 0 || val === 120) {
         return false;
     }
     return true;
