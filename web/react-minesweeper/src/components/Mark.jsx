@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Mark = () => {
-    return (<div className='flag'>Mark</div>);
+    return (<div className='mark'>Mark</div>);
 }
 
 export default Mark;
