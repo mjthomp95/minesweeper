@@ -3,6 +3,7 @@ import Cell from './Cell';
 
 const Board = () => {
     const [board, setBoard] = useState({cells: [], mines: 0, numCells: 0});
+    const [gameState, setGameState] = useState({gameOver: false, win: 'Lose'})
     const newBoard = () => {
         getNewBoard().then(data => {
             if (data) {
@@ -10,6 +11,7 @@ const Board = () => {
             }});
     };
     const endGame = () => {
+        setGameState({gameOver: false})
         fetch("http://localhost:8080/end")
     };
 
@@ -18,6 +20,7 @@ const Board = () => {
             if (changes.error === 'Lose' || changes.error === 'Win') {
                 //game over indicate win or lose
                 //Should still have changes to board
+                setGameState({gameOver: true, win: changes.error})
             } else {
                 //display error
                 console.log(changes.error)
@@ -42,14 +45,15 @@ const Board = () => {
         setBoard(tmpBoard)
     };
 
-    return (<div>
+    return (<div className='canvas'>
+            {gameState.gameOver && <h2>{gameState.win}</h2>}
             <div className='board'>
                 {[...board.cells].map((row, i) =>
-                <div key={i} className='row'>
-                    {row.map((cell, j) =>
+                    row.map((cell, j) =>
                         <Cell key={i*10+j} row={i} col={j} value={cell} changes={getChanges}/>
-                )}</div>)}
+                ))}
             </div>
+            <br/>
             <div className='panel'>
                 <button onClick={newBoard}>
                     New Game
