@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Mark = () => {
-    return (<div className='mark'><div className='set_height'></div><svg
+    return (<div className='mark'><svg
        xmlns="http://www.w3.org/2000/svg"
        id="svg9"
        version="1.1"

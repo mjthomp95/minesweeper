@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Blank = () => {
-    return (<div className='blank'><div className='set_height'></div><svg
+    return (<div className='blank'><svg
        xmlns="http://www.w3.org/2000/svg"
        id="svg8"
        version="1.1"

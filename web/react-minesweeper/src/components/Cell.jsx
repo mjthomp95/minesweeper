@@ -6,7 +6,9 @@ import Blank from './Blank';
 const Cell = (props) => {
 
     const clickHandler = (e) => {
-        click(e.button, props.row, props.col, props.changes);
+        if (!show(props.value)){
+            click(e.button, props.row, props.col, props.changes);
+        }
     };
     const doubleClickHandler = (e) => {
         doubleClick(props.row, props.col, props.changes);
@@ -25,14 +27,13 @@ const Cell = (props) => {
 }
 
 const fetchChanges = (row, col, method, callBack) => {
-    // TODO: stop doubleClick triggering click event.
     fetch(`http://localhost:8080/${method}`, {
         method: 'POST',
         headers: {'Content-Type':'application/x-www-form-urlencoded'},
         body: `row=${row}&col=${col}`
     })
     .then(resp => {return resp.json()})
-    .then(data => {callBack(data)});
+    .then(data => {callBack(data);});
 }
 
 const click = (button, row, col, callBack) => {
