@@ -124,7 +124,7 @@ func newHandler(w http.ResponseWriter, r *http.Request, board *mBoard.Board) *mB
 			return nil
 		}
 
-		tmpBoard, err := mBoard.NewBoard(height, width)
+		tmpBoard, err := mBoard.NewBoard(width, height)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return nil
