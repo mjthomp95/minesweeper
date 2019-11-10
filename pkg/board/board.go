@@ -198,9 +198,9 @@ func (b *Board) Choose(row, col int) (output []Output, err error) {
 	} else if b.cells[row][col].value == '\x00' {
 		expOut, expErr := b.Expand(row, col) //inbounds already checked
 		output = append(output, expOut...)
-		switch expErr.(type) {
-		case GameOver:
-			err = expErr
+		var gameOver GameOver
+		if errors.As(expErr, &gameOver) {
+			err = gameOver
 		}
 	}
 
@@ -234,9 +234,9 @@ func (b *Board) Expand(row, col int) (output []Output, err error) {
 		colCheck := col + direction[1]
 		chOut, chErr := b.Choose(rowCheck, colCheck) //inbounds gets checked
 		output = append(output, chOut...)
-		switch chErr.(type) {
-		case GameOver:
-			err = chErr
+		var gameOver GameOver
+		if errors.As(chErr, &gameOver) {
+			err = gameOver
 			return
 		}
 	}

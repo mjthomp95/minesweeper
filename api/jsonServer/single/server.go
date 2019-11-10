@@ -164,14 +164,14 @@ func moveWrapper(move func(int, int, **mBoard.Board) ([]mBoard.Output, error), b
 			return
 		}
 		res.Cells, err = move(row, col, board)
+		// TODO: do something with errors that aren't gameOver
 		log.Println((*board).PrintBoard()) // TEMP: used for when no frontend
 		res.Mines = (*board).GetMines()
 		res.NumCells = (*board).GetNumCells()
-		switch err.(type) {
-		case nil:
-		case mBoard.GameOver:
+		var gameOver mBoard.GameOver
+		if errors.As(err, &gameOver) {
 			(*board) = nil
-			if err.(mBoard.GameOver).Win {
+			if gameOver.Win {
 				res.Err = "Win"
 			} else {
 				res.Err = "Lose"
