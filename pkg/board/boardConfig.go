@@ -70,46 +70,46 @@ func (c Config) CreateBoard(width, height int) (*Board, error) {
 func MakeCreateBoard(maxHeight, maxWidth, maxSize int, flag bool) func(int, int) (*Board, error) {
 	f := NewBoard
 	if maxHeight > 0 {
-		f = func(h int) func(int, int) (*Board, error) {
+		f = func(h int, newBoard func(int, int) (*Board, error)) func(int, int) (*Board, error) {
 			return func(width, height int) (*Board, error) {
 				if height > h {
 					return nil, fmt.Errorf("Height is greater than Max Height: %d", h)
 				}
-				return f(width, height)
+				return newBoard(width, height)
 			}
-		}(maxHeight)
+		}(maxHeight, f)
 	}
 
 	if maxWidth > 0 {
-		f = func(w int) func(int, int) (*Board, error) {
+		f = func(w int, newBoard func(int, int) (*Board, error)) func(int, int) (*Board, error) {
 			return func(width, height int) (*Board, error) {
 				if width > w {
 					return nil, fmt.Errorf("Width is greater than Max Width: %d", w)
 				}
-				return f(width, height)
+				return newBoard(width, height)
 			}
-		}(maxWidth)
+		}(maxWidth, f)
 	}
 	if maxSize > 0 {
-		f = func(s int) func(int, int) (*Board, error) {
+		f = func(s int, newBoard func(int, int) (*Board, error)) func(int, int) (*Board, error) {
 			return func(width, height int) (*Board, error) {
 				if height*width > s {
 					return nil, fmt.Errorf("Size is greater than Max Size: %d", s)
 				}
-				return f(width, height)
+				return newBoard(width, height)
 			}
-		}(maxSize)
+		}(maxSize, f)
 	}
 
 	if flag {
-		f = func() func(int, int) (*Board, error) {
+		f = func(newBoard func(int, int) (*Board, error)) func(int, int) (*Board, error) {
 			return func(height, width int) (*Board, error) {
 				if height != width {
 					return nil, errors.New("Not a square board")
 				}
-				return f(width, height)
+				return newBoard(width, height)
 			}
-		}()
+		}(f)
 	}
 	return f
 }
