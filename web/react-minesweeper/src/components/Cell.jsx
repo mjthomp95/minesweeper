@@ -3,7 +3,7 @@ import Mark from './Mark';
 import Show from './Show';
 import Blank from './Blank';
 
-const Cell = (props) => {
+const Cell = React.memo((props) => {
 
     const clickHandler = (e) => {
         if (!show(props.value)){
@@ -24,7 +24,7 @@ const Cell = (props) => {
                 <Mark /> :
                 <Blank />
             }</div>);
-}
+});
 
 const fetchChanges = (row, col, method, callBack) => {
     fetch(`http://localhost:8080/${method}`, {

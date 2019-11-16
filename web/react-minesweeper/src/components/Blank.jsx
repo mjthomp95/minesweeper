@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Blank = () => {
+const Blank = React.memo(() => {
     return (<div className='blank'><svg
        xmlns="http://www.w3.org/2000/svg"
        id="svg8"
@@ -56,6 +56,6 @@ const Blank = () => {
       </g>
     </svg></div>
 );
-}
+});
 
 export default Blank;

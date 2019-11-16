@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-const ScoreBoard = (props) => {
+const ScoreBoard = React.memo((props) => {
     const [timer, setTimer] = useState(0);
     const [isActive, setActive] = useState(false);
     const toggle = () => {
@@ -44,7 +44,7 @@ const ScoreBoard = (props) => {
             {((props.start || props.stop) && <Timer time={timer} />)}
         </div>
     );
-};
+});
 
 const Timer = (props) => {
     return (<div className='timer'>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Mark = () => {
+const Mark = React.memo(() => {
     return (<div className='mark'><svg
        xmlns="http://www.w3.org/2000/svg"
        id="svg9"
@@ -82,6 +82,6 @@ const Mark = () => {
         </g>
       </g>
     </svg></div>);
-}
+});
 
 export default Mark;
